@@ -7,7 +7,7 @@ using Company.G02.DAL.Models;
 
 namespace Company.G02.BLL.Interfaces
 {
-    internal interface IDepartmentRepository
+    public interface IDepartmentRepository
     {
         IEnumerable<Department> GetAll();
         Department? Get(int id);
