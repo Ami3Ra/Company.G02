@@ -1,4 +1,4 @@
-﻿using Company.G02.BLL.Interfaces;
+﻿ using Company.G02.BLL.Interfaces;
 using Company.G02.BLL.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
