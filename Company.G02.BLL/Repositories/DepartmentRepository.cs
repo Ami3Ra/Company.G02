@@ -9,7 +9,7 @@ using Company.G02.DAL.Models;
 
 namespace Company.G02.BLL.Repositories
 {
-    internal class DepartmentRepository : IDepartmentRepository
+    public class DepartmentRepository : IDepartmentRepository
     {
         private readonly CompanyDbContext _context;  // NULL
 
