@@ -11,5 +11,7 @@ namespace Company.G02.DAL.Models
         public string Code { get; set; }
         public string Name { get; set; }
         public DateTime CreatAt { get; set; }
+
+        public List<Employee>? Employees { get; set; }
     }
 }

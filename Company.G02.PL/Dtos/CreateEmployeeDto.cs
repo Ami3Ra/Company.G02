@@ -30,6 +30,10 @@ namespace Company.G02.PL.Dtos
         public DateTime HiringDate { get; set; }
 
         [DisplayName("Date Of Create")]
-        public DateTime CreateAt { get; set; }
+        public DateTime CreateAt { get; set; } = DateTime.UtcNow;
+        public int? DepartmentId {  get; set; }
+
+        public string? ImageName { get; set; }
+        public IFormFile? Image { get; set; }
     }
 }
