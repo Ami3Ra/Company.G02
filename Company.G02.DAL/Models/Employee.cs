@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,5 +19,10 @@ namespace Company.G02.DAL.Models
         public bool IsDeleted { get; set; }
         public DateTime HiringDate { get; set; }
         public DateTime CreateAt { get; set; }
+
+        [DisplayName("Department")]
+        public int? DepartmentId {  get; set; }
+        public Department? Department { get; set; }
+        public string? ImageName { get; set; }
     }
 }

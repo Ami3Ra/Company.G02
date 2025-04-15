@@ -2,25 +2,30 @@
 using Company.G02.BLL.Repositories;
 using Company.G02.DAL.Models;
 using Company.G02.PL.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Company.G02.PL.Controllers
 {
+    [Authorize]
     // MVC Controller
     public class DepartmentController : Controller
     {
-        private readonly IDepartmentRepository _departmentRepository;
+        //private readonly IDepartmentRepository _departmentRepository;
+
+        private readonly IUnitOfWork _unitOfWork;
 
         // ASK CLR CREAT Object From DepartmentRepository
-        public DepartmentController(IDepartmentRepository departmentRepository)
+        public DepartmentController(/*IDepartmentRepository departmentRepository*/IUnitOfWork unitOfWork)
         {
-            _departmentRepository = departmentRepository;
+            //_departmentRepository = departmentRepository;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]  // GET : /Department/Index
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
-            var departments = _departmentRepository.GetAll();
+            var departments = await _unitOfWork.DepartmentRepository.GetAllAsync();
 
             return View(departments);
         }
@@ -32,7 +37,7 @@ namespace Company.G02.PL.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(CreateDepartmentDto model)
+        public async Task<IActionResult> Create(CreateDepartmentDto model)
         {
             if(ModelState.IsValid)
             {
@@ -42,8 +47,9 @@ namespace Company.G02.PL.Controllers
                     Name = model.Name,
                     CreatAt = model.CreatAt
                 };
-               var count =  _departmentRepository.Add(department);
-                if(count > 0)
+                 await _unitOfWork.DepartmentRepository.AddAsync(department);
+                var count = await _unitOfWork.CompleteAsync();
+                if (count > 0)
                 {
                     return RedirectToAction(nameof(Index));
                 }
@@ -53,35 +59,37 @@ namespace Company.G02.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Details(int? id, string viewName = "Details")
+        public async Task<IActionResult> Details(int? id, string viewName = "Details")
         {
             if (id is null)  return BadRequest("Invalid Id");  // 400
 
-            var department = _departmentRepository.Get(id.Value);
+            var department = await _unitOfWork.DepartmentRepository.GetAsync(id.Value);
             if (department is null) return NotFound(new { StatusCode = 404 , message = $"Department With Id : {id} is not found"});
         
             return View(viewName,department);
         }
 
         [HttpGet]
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            //if (id is null) return BadRequest("Invalid Id");  // 400
+            if (id is null) return BadRequest("Invalid Id");  // 400
 
-            //var department = _departmentRepository.Get(id.Value);
-            //if (department is null) return NotFound(new { StatusCode = 404, message = $"Department With Id : {id} is not found" });
+            var department = await _unitOfWork.DepartmentRepository.GetAsync(id.Value);
+            if (department is null) return NotFound(new { StatusCode = 404, message = $"Department With Id : {id} is not found" });
 
-            return Details(id, "Edit");
+            //return Details(id, "Edit");
+            return View(department);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit([FromRoute] int id,Department department)
+        public async Task<IActionResult> Edit([FromRoute] int id,Department department)
         {
             if (ModelState.IsValid )
             {
                 if(id != department.Id) return BadRequest(); // 400
-                var count = _departmentRepository.Update(department);
+                _unitOfWork.DepartmentRepository.Update(department);
+                var count = await _unitOfWork.CompleteAsync();
                 if (count > 0)
                 {
                     return RedirectToAction(nameof(Index));
@@ -94,24 +102,31 @@ namespace Company.G02.PL.Controllers
         }
 
         [HttpGet]
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> Delete(int? id)
         {
-            //if (id is null) return BadRequest("Invalid Id");  // 400
+            if (id is null) return BadRequest("Invalid Id");  // 400
 
-            //var department = _departmentRepository.Get(id.Value);
-            //if (department is null) return NotFound(new { StatusCode = 404, message = $"Department With Id : {id} is not found" });
-
-            return Details(id,"Delete");
+            var department = await _unitOfWork.DepartmentRepository.GetAsync(id.Value);
+            if (department is null) return NotFound(new { StatusCode = 404, message = $"Department With Id : {id} is not found" });
+            var dto = new CreateDepartmentDto()
+            {
+                Name = department.Name,
+                Code = department.Code,
+                CreatAt = department.CreatAt,
+            };
+            //return Details(id,"Delete");
+            return View(dto);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Delete([FromRoute] int id, Department department)
+        public async Task<IActionResult> Delete([FromRoute] int id, Department department)
         {
             if (ModelState.IsValid)
             {
                 if (id != department.Id) return BadRequest(); // 400
-                var count = _departmentRepository.Delete(department);
+                 _unitOfWork.DepartmentRepository.Delete(department);
+                var count = await _unitOfWork.CompleteAsync();
                 if (count > 0)
                 {
                     return RedirectToAction(nameof(Index));
